@@ -15,9 +15,12 @@ describe("store/tendermint/mutations", () => {
   });
 
   it("Check mutations.startLoading", () => {
+    state.message = "message";
+
     mutations.startLoading(state);
 
     expect(state.isFetching).toBeTruthy();
+    expect(state.message).toBe("");
   });
 
   it("Check mutations.stopLoading", () => {
@@ -29,51 +32,48 @@ describe("store/tendermint/mutations", () => {
   });
 
   it("Check mutations.setMessage", () => {
-    const message = {
-      text: "Check mutations.setMessage",
-      type: "type"
-    };
+    const message = "mutations.setMessage error";
+
     mutations.setMessage(state, message);
 
     expect(state.message).toEqual(message);
   });
 
-  it("Check mutations.setBlocks", () => {
-    const data = [{
-      id: 1
-    }];
-
-    mutations.setBlocks(state, data);
-
-    expect(state.blocks).toEqual(data);
-  });
-
-  it("Check mutations.addBlocks", () => {
+  it("Check mutations.addNewBlock", () => {
     state.blocks = [{
-      id: 1
-    }];
-    const data = [{
-      id: 2
-    }];
+        id: 2
+      },
+      {
+        id: 1
+      }
+    ];
+    const data = {
+      id: 3
+    };
     const expectBlocks = [{
-      id: 1
-    }, {
-      id: 2
-    }];
+        id: 3
+      },
+      {
+        id: 2
+      },
+      {
+        id: 1
+      }
+    ];
 
-    mutations.addBlocks(state, data);
+    mutations.addNewBlock(state, data);
 
     expect(state.blocks).toEqual(expectBlocks);
   });
 
-  it("Check mutations.setTransactions", () => {
-    const data = [{
+  it("Check mutations.setLastBlock", () => {
+    const data = {
       id: 1
-    }];
+    };
 
-    mutations.setTransactions(state, data);
+    mutations.setLastBlock(state, data);
 
-    expect(state.transactions).toEqual(data);
+    expect(state.lastBlock).toEqual(data);
   });
 
   it("Check mutations.addTransactions", () => {

@@ -3,64 +3,41 @@
  */
 
 import api from "./api";
+import {
+  RpcClient
+} from "tendermint";
+import {
+  WS
+} from "Constants";
+
+const client = RpcClient(WS);
 
 export default {
   /**
-   * Action to get the blocks list
+   * Action to subscribe new block web socket
    * 
-   * @param {Function} dispatch 
-   * @param {number} blocks
+   * @param {Function} commit
    */
-  getBlocks({
+  subNewClient({
+    commit,
     dispatch
-  }, blocks) {
-    dispatch("fetchBlocks", blocks);
-  },
-  /**
-   * Action to fetch a blocks list
-   * 
-   * @param {Function} commit 
-   * @param {number} blocks
-   */
-  async fetchBlocks({
-    commit
-  }, blocks) {
-    commit("startLoading");
-    commit("setServerReachability", true, {
-      root: true
-    });
-    try {
-      const response = await api.requestLastBlock();
-      const height = response.data.block.header.height;
-      let min = (blocks && blocks < 19) ?
-        height - blocks :
-        height - 19;
-      let max = height;
-      const res = await api.requestBlockChain(min, max);
-      commit("setBlocks", res.data.result.block_metas);
-    } catch (error) {
-      if (error.response !== undefined) {
-        commit("setMessage", error.response);
-      } else {
-        commit("setServerReachability", false, {
-          root: true
-        });
+  }) {
+    client.subscribe({
+      query: "tm.event = 'NewBlock'"
+    }, event => {
+      let block = event.block;
+      commit("addNewBlock", block);
+      commit("setLastBlock", block);
+      dispatch("stake/fetchPool", null, {
+        root: true
+      });
+      if (block.header.num_txs * 1 > 0) {
+        dispatch("updateTransactions", block.header.height);
       }
-    } finally {
-      commit("stopLoading");
-    }
+    });
   },
   /**
-   * 
-   * @param {Function} dispatch 
-   * @param {Object} filters // tag, page, limit
-   */
-  getTransactions({
-    dispatch
-  }, filters) {
-    dispatch("fetchTransactions", filters);
-  },
-  /**
+   * Action to fetch transactions
    * 
    * @param {Function} commit 
    * @param {Object} filters // tag, page, limit
@@ -74,10 +51,10 @@ export default {
     });
     try {
       const response = await api.requestTransactions(filters);
-      commit("setTransactions", response.data);
+      commit("addTransactions", response.data);
     } catch (error) {
       if (error.response !== undefined) {
-        commit("setMessage", error.response);
+        commit("setMessage", error.response.data.error);
       } else {
         commit("setServerReachability", false, {
           root: true
@@ -87,24 +64,19 @@ export default {
       commit("stopLoading");
     }
   },
-  /**
-   * 
-   * @param {Function} commit 
-   * @param {Object} filters // tag, page, limit
-   */
   async updateTransactions({
     commit
-  }, filters) {
+  }, height) {
     commit("startLoading");
     commit("setServerReachability", true, {
       root: true
     });
     try {
-      const response = await api.requestTransactions(filters);
+      const response = await api.requestTransactionsByHeight(height);
       commit("addTransactions", response.data);
     } catch (error) {
       if (error.response !== undefined) {
-        commit("setMessage", error.response);
+        commit("setMessage", error.response.data.error);
       } else {
         commit("setServerReachability", false, {
           root: true
@@ -113,5 +85,5 @@ export default {
     } finally {
       commit("stopLoading");
     }
-  }
+  },
 };

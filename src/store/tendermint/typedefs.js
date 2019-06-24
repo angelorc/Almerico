@@ -3,20 +3,19 @@
  */
 /** @typedef {Object} TendermintState
  * @property {Array.<Block>} blocks
+ * @property {Block} lastBlock
  * @property {Array.<Transaction>} transactions
  * @property {boolean} isFetching
- * @property {Message} message
- */
-/** @typedef {Object} Message
- * @property {string} code
- * @property {Object} data
- * @property {string} type
+ * @property {String} message
  */
 /** @typedef {Object} Block 
- * @property {Array.<String>} evidence 
+ * @property {BlockData} data 
  * @property {Header} header 
  * @property {Commit} last_commit 
  * @property {Array.<String>} txs 
+ */
+/** @typedef {Object} BlockData 
+ * @property {Array.<StringS} txs 
  */
 /** @typedef {Object} Header 
  * @property {String} app_hash 

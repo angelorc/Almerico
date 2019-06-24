@@ -9,6 +9,7 @@ export default {
    * @param {TendermintState} state
    */
   startLoading(state) {
+    state.message = "";
     state.isFetching = true;
   },
   /**
@@ -23,45 +24,38 @@ export default {
    * Set Tendermint message
    *
    * @param {TendermintState} state
-   * @param {Message} message
+   * @param {String} message
    */
   setMessage(state, message) {
     state.message = message;
   },
   /**
-   * Set blocks data
+   * Add block to blocks list
    * 
    * @param {TendermintState} state 
-   * @param {Array} data 
+   * @param {Block} data 
    */
-  setBlocks(state, data) {
-    state.blocks = data;
+  addNewBlock(state, data) {
+    const blocks = [...state.blocks];
+    state.blocks.length = 0;
+    state.blocks.push(data, ...blocks);
   },
   /**
-   * Add blocks data
+   * Set last block
    * 
    * @param {TendermintState} state 
-   * @param {Array} data 
+   * @param {Block} data 
    */
-  addBlocks(state, data) {
-    state.blocks.push(...data);
-  },
-  /**
-   * Set transactions data
-   * 
-   * @param {TendermintState} state 
-   * @param {Array} data 
-   */
-  setTransactions(state, data) {
-    state.transactions = data;
+  setLastBlock(state, data) {
+    state.lastBlock = data;
   },
   /**
    * Add transactions data
    *
    * @param {TendermintState} state
-   * @param {Array} data
+   * @param {Array.<Transaction>} data
    */
   addTransactions(state, data) {
     state.transactions.push(...data);
-  },
+  }
 };
